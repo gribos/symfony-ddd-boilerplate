@@ -1,0 +1,60 @@
+deptrac:
+  paths:
+    - ./src
+  exclude_files:
+    - '#.*Test.*#'
+    - '#.*Kernel.*#'
+  layers:
+    - name: Controller
+      collectors:
+        - type: className
+          value: 'App\Controller\.*'
+    - name: Command
+      collectors:
+        - type: className
+          value: 'App\Command\.*'
+    - name: Service
+      collectors:
+        - type: className
+          value: 'App\Service\.*'
+    - name: Repository
+      collectors:
+        - type: className
+          value: 'App\Repository\.*'
+    - name: Entity
+      collectors:
+        - type: className
+          value: 'App\Entity\.*'
+    - name: DTO
+      collectors:
+        - type: className
+          value: 'App\DTO\.*'
+    - name: Event
+      collectors:
+        - type: className
+          value: 'App\Event\.*'
+    - name: EventSubscriber
+      collectors:
+        - type: className
+          value: 'App\EventSubscriber\.*'
+  ruleset:
+    Controller:
+      - Service
+      - DTO
+      - Entity
+    Command:
+      - Service
+      - Entity
+    Service:
+      - Repository
+      - Entity
+      - DTO
+      - Event
+    Repository:
+      - Entity
+    DTO:
+      - Entity
+    EventSubscriber:
+      - Event
+    Entity: ~
+    Event: ~

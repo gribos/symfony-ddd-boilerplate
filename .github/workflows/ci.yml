@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Docker
+        run: |
+          cp .env.dist .env
+          docker compose up -d --build
+
+      - name: Wait for services
+        run: |
+          docker compose exec -T db pg_isready -U app -d app
+          docker compose exec -T redis redis-cli ping
+
+      - name: Install dependencies
+        run: docker compose exec -T php composer install --no-interaction
+
+      - name: Run PHP-CS-Fixer
+        run: docker compose exec -T php vendor/bin/php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.dist.php
+
+      - name: Run PHPStan
+        run: docker compose exec -T php vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress
+
+      - name: Run Deptrac
+        run: docker compose exec -T php vendor/bin/deptrac analyse --config-file=deptrac.yaml --no-progress
+
+      - name: Run PHPUnit
+        run: docker compose exec -T php bin/phpunit
