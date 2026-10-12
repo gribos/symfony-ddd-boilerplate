@@ -29,3 +29,5 @@ services:
         App\Shared\Application\Query\QueryHandlerInterface:
             tags:
                 - { name: messenger.message_handler, bus: query.bus }
+        App\Shared\Ui\Api\Endpoint\ApiEndpoint:
+            tags: ['controller.service_arguments']
