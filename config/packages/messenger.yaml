@@ -1,0 +1,42 @@
+framework:
+    messenger:
+        default_bus: command.bus
+        buses:
+            command.bus:
+                middleware:
+                    - doctrine_ping_connection
+                    - doctrine_transaction
+            query.bus:
+        transports:
+            # https://symfony.com/doc/current/messenger.html#transport-configuration
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    table_name: queues.messages
+                    auto_setup: false
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000
+                    multiplier: 2
+                    max_delay: 0
+                failure_transport: failed
+            failed:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    table_name: queues.messages_failed
+                    auto_setup: false
+            sync: 'sync://'
+
+        routing:
+            'App\Shared\Application\Command\SyncCommand': sync
+            'App\Shared\Application\Command\AsyncCommand': async
+            'App\Shared\Application\Query\SyncQuery': sync
+            'App\Shared\Application\Query\AsyncQuery': async
+
+# when@test:
+#    framework:
+#        messenger:
+#            transports:
+#                # replace with your transport name here (e.g., my_transport: 'in-memory://')
+#                # For more Messenger testing tools, see https://github.com/zenstruck/messenger-test
+#                async: 'in-memory://'
